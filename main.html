@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="text/typescript" src="script.ts"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="UTF-8">
+    <title>Mars</title>
+    <script src="https://rawgit.com/Microsoft/TypeScript/master/lib/typescriptServices.js"></script>
+    <script src="https://rawgit.com/basarat/typescript-script/master/transpiler.js"></script>
+</head>
+<body onload="initView()">
+<span>
+    <div id="canvas_place">
+        <canvas id="canvas" width="300" height="300"></canvas>
+    </div>
+    <div id="data_reader">
+        <label id="map_reader" class="saving_field">
+            <div>Карта</div>
+            <textarea id="map_area">1 2 3 4
+1 2 3 4</textarea>
+            <button onclick="saveMap()"> Save </button>
+        </label>
+        <label id="way_reader" class="saving_field">
+            <div>Путь марсохода</div>
+            <textarea id="path_area">RRDRU</textarea>
+            <button id="run_btn" disabled onclick="runWay()"> Run! </button>
+        </label>
+    </div>
+
+</span>
+</body>
+</html>

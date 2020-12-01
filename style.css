@@ -1,0 +1,13 @@
+#data_reader {
+    margin-left: auto;
+    margin-right: 15pt;
+    float: right;
+}
+
+.saving_field {
+    display: block;
+}
+
+#canvas {
+    float: left;
+}
