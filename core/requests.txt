@@ -1,3 +1,3 @@
-curl -i -X GET -H 'Content-Type: application/json' -d '{"id": "2", "start": {"x": "0", "y": "0"}, "finish": {"x": "4", "y": "4"}}' http://127.0.0.1:8080/path
+curl -i -X GET -H 'Content-Type: application/json' -d '{"id": "2", "start": {"x": "0", "y": "0"}, "finish": {"x": "4", "y": "4"}}' http://127.0.0.1:8080/v0/path
 
-curl -i -X GET -H 'Content-Type: application/json' -d '{"id": "3", "start": {"x": "0", "y": "0"}, "finish": {"x": "9", "y": "9"}}' http://127.0.0.1:8080/path
+curl -i -X GET -H 'Content-Type: application/json' -d '{"id": "3", "start": {"x": "0", "y": "0"}, "finish": {"x": "9", "y": "9"}}' http://127.0.0.1:8080/v0/path

@@ -1,6 +1,6 @@
 const directoryPath = "resources";
-const mapsFileName = "maps-info.json"
-
+const mapsFileName = "maps-info.json";
+const version = "/v0";
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -12,25 +12,25 @@ const World = require('./world')
 var jsonParser = bodyParser.json();
 
 
-maps = JSON.parse(fs.readFileSync(path.join(directoryPath, mapsFileName)))
+maps = JSON.parse(fs.readFileSync(path.join(directoryPath, mapsFileName)));
 
 var app = express();
 
 app.use(express.static(__dirname + "/public"));
 
 
-app.get("/health", function (req, res) {
+app.get(version + "/health", function (req, res) {
     res.send("Server is working!");
 });
 
-app.get("/get", function (req, res) {
+app.get(version + "/map", function (req, res) {
     res.send(maps);
 })
 
-app.get("/get/:id", function (req, res) {
+app.get(version + "/map/:id", function (req, res) {
     var id = req.params.id;
     try {
-        var map = fs.readFileSync(path.join(directoryPath, "map" + id)).toString();
+        var map = fs.readFileSync(path.join(directoryPath, "map" + id + ".json")).toString();
         res.send(map);
     } catch (err) {
         if (err.code === "ENOENT") {
@@ -118,7 +118,7 @@ function findPath(map, start, finish) {
     return cmds;
 }
 
-app.get("/path", jsonParser, function (req, res) {
+app.get(version + "/path", jsonParser, function (req, res) {
     if (!req.body) {
         res.status(404).send();
     }
