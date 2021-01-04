@@ -105,17 +105,19 @@ function findPath(map, start, finish) {
     cmds0 = cmds0.reverse();
 
     let rover = new World.Rover(start.x, start.y, map);
-    let cmds = {"cmds": []};
+    let path = {"cmds": []};
     cmds0.forEach(cmd => {
         while (!rover.canMove(cmd)) {
             rover.doCommand(World.COMMAND.CHARGE);
-            cmds.cmds.push(World.COMMAND.CHARGE);
+            path.cmds.push(World.COMMAND.CHARGE);
         }
         rover.doCommand(cmd);
-        cmds.cmds.push(cmd);
+        path.cmds.push(cmd);
     });
+    path.cost = path.cmds.length;
+    path.energy = rover.energy;
 
-    return cmds;
+    return path;
 }
 
 app.get(version + "/path", jsonParser, function (req, res) {
