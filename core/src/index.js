@@ -25,7 +25,7 @@ app.get(version + "/health", function (req, res) {
 
 app.get(version + "/map", function (req, res) {
     res.send(maps);
-})
+});
 
 app.get(version + "/map/:id", function (req, res) {
     var id = req.params.id;
@@ -37,7 +37,7 @@ app.get(version + "/map/:id", function (req, res) {
             res.status(404).send();
         }
     }
-})
+});
 
 function buildMapFromJSON(mapEncoded) {
     const cellByNum = {
@@ -96,7 +96,7 @@ function findPath(map, start, finish) {
         throw "No path!";
     }
 
-    while (finish.x !== start.x || finish.y !== finish.x) {
+    while (finish.x !== start.x || finish.y !== start.y) {
         let dir = how[finish.x][finish.y];
         cmds0.push(dir[0]);
         finish.x -= dir[1];
@@ -123,8 +123,8 @@ app.get(version + "/path", jsonParser, function (req, res) {
         res.status(404).send();
     }
     let id = req.body.id;
-    let start = {x: parseInt(req.body.start.y), y: parseInt(req.body.start.y)};
-    let finish = {x: parseInt(req.body.finish.y), y: parseInt(req.body.finish.y)};
+    let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+    let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
     try {
         let map = fs.readFileSync(path.join(directoryPath, "map" + id + ".json")).toString();
         try {
@@ -139,8 +139,8 @@ app.get(version + "/path", jsonParser, function (req, res) {
             res.status(404).send();
         }
     }
-})
+});
 
 app.listen(8080, function () {
     console.log("Server created!");
-})
+});
