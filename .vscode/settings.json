@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/3666b2e5-89b5-42d4-8f93-3a6694178ced/resourceGroups/marsrovers-rg/providers/Microsoft.Web/sites/marsroverservice",
+    "appService.deploySubpath": "."
+}
