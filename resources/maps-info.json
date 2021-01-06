@@ -11,9 +11,9 @@
     {
       "id": 2,
       "description": "Hard map 5x5"
-    },
+    }, 
     {
-      "id": 2,
+      "id": 3,
       "description": "Snake-like maze 10x10"
     }
   ]
