@@ -11,18 +11,17 @@
 <body onload="initView()">
 <span>
     <div id="canvas_place">
-        <canvas id="canvas" width="300" height="300"></canvas>
+        <canvas id="canvas" width="300" height="300" hidden></canvas>
     </div>
     <div id="data_reader">
         <label id="map_reader" class="saving_field">
             <div>Карта</div>
-            <textarea id="map_area">1 2 3 4
-1 2 3 4</textarea>
+            <textarea id="map_area">[[1,2,3,4],[1,2,3,4]]</textarea>
             <button onclick="saveMap()"> Save </button>
         </label>
         <label id="way_reader" class="saving_field">
             <div>Путь марсохода</div>
-            <textarea id="path_area">RRDRU</textarea>
+            <textarea id="path_area">{"start":{"x":1,"y":1},"path":["RIGHT", "RIGHT", "DOWN","RIGHT"]}</textarea>
             <button id="run_btn" disabled onclick="runWay()"> Run! </button>
         </label>
     </div>
