@@ -39,7 +39,7 @@ app.get(version + "/map/:id", function (req, res) {
     }
 });
 
-function buildMapFromJSON(mapEncoded) {
+function buildMapFromJSON(map) {
     const cellByNum = {
         1: World.CELL.ROCK,
         2: World.CELL.RAVINE,
@@ -48,7 +48,6 @@ function buildMapFromJSON(mapEncoded) {
         5: World.CELL.GROUND,
         6: World.CELL.GROUND_SHADOW
     };
-    let map = JSON.parse(mapEncoded)
     map.n = parseInt(map.n);
     map.m = parseInt(map.m);
     for (let i = 0; i < map.n; i++) {
@@ -130,8 +129,31 @@ app.get(version + "/path", jsonParser, function (req, res) {
     try {
         let map = fs.readFileSync(path.join(directoryPath, "map" + id + ".json")).toString();
         try {
-            let commands = findPath(buildMapFromJSON(map), start, finish);
-            res.send(commands);
+            let path = findPath(buildMapFromJSON(JSON.parse(map)), start, finish);
+            res.send(path);
+        } catch (err) {
+            res.status(400).send();
+        }
+
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            res.status(404).send();
+        }
+    }
+});
+
+app.get(version + "/path/map", jsonParser, function (req, res) {
+    if (!req.body) {
+        res.status(404).send();
+    }
+    let id = req.body.id;
+    let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+    let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
+    let map = req.body.map;
+    try {
+        try {
+            let path = findPath(buildMapFromJSON(map), start, finish);
+            res.send(path);
         } catch (err) {
             res.status(400).send();
         }
