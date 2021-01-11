@@ -19,3 +19,7 @@ curl -i -X GET -H 'Content-Type: application/json' -d '{"id": "3", "start": {"x"
     [4, 1, 4, 4, 4, 2, 4, 5, 5, 5]
   ]
 }}' http://127.0.0.1:8080/v0/path/map
+
+curl -i -X GET -H 'Content-Type: application/json' -d '{"id": "3", "start": {"x": "0", "y": "0"}, "finish": {"x": "9", "y": "9"},
+"path": ["RIGHT","RIGHT","DOWN","DOWN","DOWN","DOWN","DOWN","DOWN","DOWN","DOWN","DOWN","RIGHT","RIGHT","UP","UP","UP","CHARGE","CHARGE","RIGHT","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","RIGHT","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","DOWN","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","DOWN","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","CHARGE","DOWN","CHARGE","CHARGE","CHARGE","RIGHT","CHARGE","RIGHT","CHARGE","RIGHT"]
+}' http://127.0.0.1:8080/v0/path/cost

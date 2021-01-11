@@ -48,6 +48,7 @@ class Rover {
     canMove(cmd) {
         let was_x = this.x;
         let was_y = this.y;
+        let was_energy = this.energy;
 
         switch (cmd) {
             case COMMAND.LEFT:
@@ -62,6 +63,8 @@ class Rover {
             case COMMAND.DOWN:
                 was_x++;
                 break;
+            case COMMAND.CHARGE:
+                return true;
             default:
                 throw "Bad command!";
         }

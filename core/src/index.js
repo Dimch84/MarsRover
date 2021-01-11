@@ -4,7 +4,7 @@ const version = "/v0";
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
+let path = require('path');
 const fs = require('fs');
 
 const World = require('./world')
@@ -146,11 +146,10 @@ app.get(version + "/path/map", jsonParser, function (req, res) {
     if (!req.body) {
         res.status(404).send();
     }
-    let id = req.body.id;
-    let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
-    let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
-    let map = req.body.map;
     try {
+        let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+        let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
+        let map = req.body.map;
         try {
             let path = findPath(buildMapFromJSON(map), start, finish);
             res.send(path);
@@ -161,6 +160,48 @@ app.get(version + "/path/map", jsonParser, function (req, res) {
     } catch (err) {
         if (err.code === "ENOENT") {
             res.status(404).send();
+        }
+    }
+});
+
+function getPathCost(map, cmds, start, finish) {
+    map = map.data;
+
+    let rover = new World.Rover(start.x, start.y, map);
+    cmds.forEach(cmd => {
+        if (!rover.canMove(cmd)) {
+            throw "Bad commands!";
+        }
+        rover.doCommand(cmd);
+    });
+    if (rover.x !== finish.x || rover.y !== finish.y) {
+        throw "Bad commands!";
+    }
+    return {"cost": cmds.length, "energy": rover.energy};
+}
+
+app.get(version + "/path/cost", jsonParser, function (req, res) {
+    if (!req.body) {
+        res.status(404).send();
+    }
+    try {
+        let id = req.body.id;
+        let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+        let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
+        let pth = req.body.path;
+        let map = fs.readFileSync(path.join(directoryPath, "map" + id + ".json")).toString();
+        try {
+            let path = getPathCost(buildMapFromJSON(JSON.parse(map)), pth, start, finish);
+            res.send(path);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            res.status(404).send();
+        } else {
+            res.status(404).send(err);
         }
     }
 });
