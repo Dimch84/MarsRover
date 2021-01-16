@@ -6,24 +6,36 @@
     <title>Mars</title>
 </head>
 <body onload="initView()">
-<span>
-    <div id="canvas_place">
+<table>
+<tr>
+<td>
+    <div id="canvas_place" style="float: left;" align="left">
         <canvas id="canvas" width="300" height="300" hidden></canvas>
     </div>
-    <div id="data_reader">
+</td>
+</tr>
+<tr style='height:20px'></tr>
+<tr>
+<td>
+    <div id="data_reader" style="float: left;" align="left">
         <label id="map_reader" class="saving_field">
             <div>Карта</div>
-            <textarea id="map_area">[[1,2,3,4],[1,2,3,4]]</textarea>
-            <button onclick="saveMap()"> Save </button>
+            <textarea id="map_area" style='min-width:500px;min-height:200px'>[[1,2,3,4],[1,2,3,4]]</textarea>
+            <button onclick="saveMap()"> Draw </button>
         </label>
         <label id="way_reader" class="saving_field">
             <div>Путь марсохода</div>
-            <textarea id="path_area">{"start":{"x":0,"y":0},"path":["RIGHT", "RIGHT", "DOWN","RIGHT"]}</textarea>
+            <textarea id="path_area" style='min-width:500px;min-height:100px'>
+{
+  "start" : {"x" : 0, "y" : 0},
+  "path" : ["RIGHT", "RIGHT", "DOWN","RIGHT"]
+}</textarea>
             <button id="run_btn" disabled onclick="runWay()"> Run! </button>
         </label>
     </div>
-
-</span>
+</td>
+</tr>
+</table>
 </body>
 <script>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
