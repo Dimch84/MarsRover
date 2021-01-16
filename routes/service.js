@@ -45,7 +45,7 @@ router.get("/map/:id", function (req, res) {
 
 ////////////////////////
 
-function buildMapFromJSON(mapEncoded) {
+function buildMapFromJSON(map) {
     const cellByNum = {
         1: World.CELL.ROCK,
         2: World.CELL.RAVINE,
@@ -54,7 +54,6 @@ function buildMapFromJSON(mapEncoded) {
         5: World.CELL.GROUND,
         6: World.CELL.GROUND_SHADOW
     };
-    let map = JSON.parse(mapEncoded)
     map.n = parseInt(map.n);
     map.m = parseInt(map.m);
     for (let i = 0; i < map.n; i++) {
@@ -102,7 +101,7 @@ function findPath(map, start, finish) {
         throw "No path!";
     }
 
-    while (finish.x !== start.x || finish.y !== finish.x) {
+    while (finish.x !== start.x || finish.y !== start.y) {
         let dir = how[finish.x][finish.y];
         cmds0.push(dir[0]);
         finish.x -= dir[1];
@@ -111,17 +110,19 @@ function findPath(map, start, finish) {
     cmds0 = cmds0.reverse();
 
     let rover = new World.Rover(start.x, start.y, map);
-    let cmds = {"cmds": []};
+    let path = {"cmds": []};
     cmds0.forEach(cmd => {
         while (!rover.canMove(cmd)) {
             rover.doCommand(World.COMMAND.CHARGE);
-            cmds.cmds.push(World.COMMAND.CHARGE);
+            path.cmds.push(World.COMMAND.CHARGE);
         }
         rover.doCommand(cmd);
-        cmds.cmds.push(cmd);
+        path.cmds.push(cmd);
     });
+    path.cost = path.cmds.length;
+    path.energy = rover.energy;
 
-    return cmds;
+    return path;
 }
 
 router.get("/path", jsonParser, function (req, res) {
@@ -129,13 +130,13 @@ router.get("/path", jsonParser, function (req, res) {
         res.status(404).send();
     }
     let id = req.body.id;
-    let start = {x: parseInt(req.body.start.y), y: parseInt(req.body.start.y)};
-    let finish = {x: parseInt(req.body.finish.y), y: parseInt(req.body.finish.y)};
+    let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+    let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
     try {
         let map = fs.readFileSync(path.join(directoryPath, "map" + id + ".json")).toString();
         try {
-            let commands = findPath(buildMapFromJSON(map), start, finish);
-            res.send(commands);
+            let path = findPath(buildMapFromJSON(JSON.parse(map)), start, finish);
+            res.send(path);
         } catch (err) {
             res.status(400).send();
         }
@@ -145,7 +146,96 @@ router.get("/path", jsonParser, function (req, res) {
             res.status(404).send();
         }
     }
-})
+});
+
+router.get("/path/map", jsonParser, function (req, res) {
+    if (!req.body) {
+        res.status(404).send();
+    }
+    try {
+        let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+        let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
+        let map = req.body.map;
+        try {
+            let path = findPath(buildMapFromJSON(map), start, finish);
+            res.send(path);
+        } catch (err) {
+            res.status(400).send();
+        }
+
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            res.status(404).send();
+        }
+    }
+});
+
+function getPathCost(map, cmds, start, finish) {
+    map = map.data;
+
+    let rover = new World.Rover(start.x, start.y, map);
+    cmds.forEach(cmd => {
+        if (!rover.canMove(cmd)) {
+            throw "Bad commands!";
+        }
+        rover.doCommand(cmd);
+    });
+    if (rover.x !== finish.x || rover.y !== finish.y) {
+        throw "Bad commands!";
+    }
+    return {"cost": cmds.length, "energy": rover.energy};
+}
+
+router.get("/path/cost", jsonParser, function (req, res) {
+    if (!req.body) {
+        res.status(404).send();
+    }
+    try {
+        let id = req.body.id;
+        let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+        let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
+        let pth = req.body.path;
+        let map = fs.readFileSync(path.join(directoryPath, "map" + id + ".json")).toString();
+        try {
+            let path = getPathCost(buildMapFromJSON(JSON.parse(map)), pth, start, finish);
+            res.send(path);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            res.status(404).send();
+        } else {
+            res.status(404).send(err);
+        }
+    }
+});
+
+router.get("/path/cost_map", jsonParser, function (req, res) {
+    if (!req.body) {
+        res.status(404).send();
+    }
+    try {
+        let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+        let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
+        let pth = req.body.path;
+        let map = req.body.map; // map is already JSON object here
+        try {
+            let path = getPathCost(buildMapFromJSON(map), pth, start, finish);
+            res.send(path);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            res.status(404).send();
+        } else {
+            res.status(404).send(err);
+        }
+    }
+});
 
 ////////////////////////
 module.exports = router;
