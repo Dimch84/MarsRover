@@ -1,5 +1,3 @@
-
-
 const Constants = Object.freeze({
     MAX_ENERGY: 100,
 
@@ -9,7 +7,6 @@ const Constants = Object.freeze({
     CHARGE_SUN: 3,
     CHARGE_SHADOW: 1,
 });
-
 
 const COMMAND = Object.freeze({LEFT: "LEFT", RIGHT: "RIGHT", UP: "UP", DOWN: "DOWN", CHARGE: "CHARGE"})
 

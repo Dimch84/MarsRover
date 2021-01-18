@@ -1,0 +1,203 @@
+var canvas;
+var dataWidth;
+var dataHeight;
+var squareSize;
+var ctx;
+var canvasWidth;
+var canvasHeight;
+var curArrData;
+
+var n;
+var m;
+
+var xPosDelta=0;
+var yPosDelta=0;
+
+var pathObject;
+
+
+function initView(canvas_param) {
+    canvas = canvas_param;
+    initCanvas();
+    loadPictures();
+}
+
+function initCanvas() {
+    var size = window.innerHeight;
+    canvas.setAttribute("width", String(size * 0.9));
+    canvas.setAttribute("height", String(size * 0.95));
+}
+
+function loadPictures() {
+    for (var i = 0; i < 6; i++) {
+        patterns[i] = new Image();
+        patterns[i].src = "images/patterns/type" + (i + 1).toString() + ".png";
+    }
+}
+
+function saveMap() {
+    return __awaiter(this, void 0, void 0, function () {
+        var field, _i, arrData, arrData_1, line;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    field = document.getElementById("map_area");
+                    return [4 /*yield*/, JSON.parse(field.value)];
+                case 1:
+                    arrData = _a.sent();
+                    var line;
+                    for (_i = 0, arrData_1 = arrData; _i < arrData_1.length; _i++) {
+                        line = arrData_1[_i];
+                        console.log(line);
+                        if (line.length != arrData[0].length) {
+                            alert("Matrix is incorrect");
+                            return [2 /*return*/];
+                        }
+                    }
+
+                    n = arrData_1.length; 
+                    m = line.length;    
+
+                    applyDataToMap(arrData);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+
+function applyDataToMap(arrData) {
+    canvas.hidden = false;
+    curArrData = arrData;
+    dataWidth = arrData[0].length;
+    dataHeight = arrData.length;
+    squareSize = Math.min(innerWidth * 0.95 / dataWidth, innerHeight * 0.95 / dataHeight);
+    ctx = canvas.getContext('2d');
+    canvasWidth = dataWidth * squareSize;
+    canvasHeight = dataHeight * squareSize;
+    canvas.setAttribute("width", String(dataWidth * squareSize));
+    canvas.setAttribute("height", String(dataHeight * squareSize));
+    console.log(dataHeight);
+    console.log(dataWidth);
+    refreshCanvas();
+    document.getElementById("run_btn").disabled = false;
+}
+
+var patterns = new Array(6);
+function refreshCanvas() {
+    ctx.fillStyle = "#ffe4ff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#000000";
+    ctx.font = Math.max(30, squareSize / 100) + "px Arial";
+    for (var i = 0; i < dataHeight; i++) {
+        for (var j = 0; j < dataWidth; j++) {
+            //ctx.fillText(curArrData[i][j], (j + 0.5) * squareSize, (i + 0.5) * squareSize, squareSize);
+            ctx.drawImage(patterns[curArrData[i][j]-1], j * squareSize, i * squareSize, squareSize, squareSize);
+        }
+    }
+}
+
+function runWay() {
+    return __awaiter(this, void 0, void 0, function () {
+        var pathField, data, ctx, curX, curY, deltaX, deltaY, _i, data_1, c, savedWidth;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    refreshCanvas();
+                    pathField = document.getElementById("path_area");
+                    return [4 /*yield*/, JSON.parse(pathField.value)];
+                case 1:
+                    pathObject = _a.sent();
+                    console.log(pathObject);
+                    data = pathObject.path;
+                    ctx = canvas.getContext('2d');
+                    ctx.beginPath();
+                    ctx.moveTo(squareSize * (pathObject.start.x + 1 - 0.5), squareSize * (pathObject.start.y + 1 - 0.5));
+                    curX = squareSize / 2;
+                    curY = squareSize / 2;
+                    deltaX = {
+                        'CHARGE': 0,
+                        'UP': 0,
+                        'DOWN': 0,
+                        'RIGHT': +1,
+                        'LEFT': -1
+                    };
+                    deltaY = {
+                        'CHARGE': 0,
+                        'UP': -1,
+                        'DOWN': +1,
+                        'RIGHT': 0,
+                        'LEFT': 0
+                    };
+
+                    xPosDelta = 0;
+                    yPosDelta = 0;
+                    for (_i = 0, data_1 = data; _i < data_1.length; _i++) {
+                        c = data_1[_i];
+                        xPosDelta += deltaX[c];
+                        yPosDelta += deltaY[c];
+
+                        curX += deltaX[c] * squareSize;
+                        curY += deltaY[c] * squareSize;
+                        ctx.lineTo(curX, curY);
+                        if (curX > canvasWidth || curY > canvasHeight || curX < 0 || curY < 0) {
+                            alert("You've lost");
+                            break;
+                        }
+                    }
+                    savedWidth = ctx.lineWidth;
+                    ctx.lineWidth = 10;
+                    ctx.strokeStyle = "white";
+                    ctx.arc(curX, curY, squareSize / 6, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(curX, curY, squareSize / 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.lineWidth = savedWidth;
+                    ctx.stroke();
+
+            document.getElementById("run_cost_btn").disabled = false;
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+
+// auto generated code
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+//

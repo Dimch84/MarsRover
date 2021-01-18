@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <meta charset="UTF-8">
+    <title>Mars</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+</head>
+
+<body onload="initView(document.getElementById('canvas'))">
+<table>
+<tr>
+<td>
+    <div id="canvas_place" style="float: left;" align="left">
+        <canvas id="canvas" width="300" height="300" hidden></canvas>
+    </div>
+</td>
+</tr>
+<tr style='height:20px'></tr>
+<tr>
+<td>
+    <div id="data_reader" style="float: left;" align="left">
+        <label id="map_reader" class="saving_field">
+            <div>Карта</div>
+            <textarea id="map_area" style='min-width:500px;min-height:200px'>[[3,4,5,6,1,2],[3,4,5,6,2,1]]</textarea>
+            <button onclick="saveMap()"> Draw </button>
+        </label>
+        <label id="way_reader" class="saving_field">
+            <div>Путь марсохода</div>
+            <textarea id="path_area" style='min-width:500px;min-height:100px'>
+{
+"start" : {"x" : 0, "y" : 0},
+"path" : ["RIGHT", "RIGHT", "DOWN","RIGHT"]
+}
+             </textarea>
+            <button id="run_btn" disabled onclick="runWay()"> Run! </button>
+        </label>
+    </div>
+</td>
+</tr>
+<tr>
+<td>
+    <label>
+        <div>Стоимость пути</div>
+        <textarea id="path_cost" style='min-width:500px;min-height:20px'>
+        </textarea>
+        <button id="run_cost_btn" disabled> Get Path Cost </button>
+    </label>
+</td>
+</tr>
+</table>
+</body>
+
+<script>
+$(document).ready(function(){
+  $("#run_cost_btn").click(function (event) {
+    // prepare mainParam object with data to pass in http body request 
+    var finish = {"x": pathObject.start.y + yPosDelta, "y": pathObject.start.x + xPosDelta} // service takes X axis as vertical, Y - horizon 
+    var map = {"n": n, "m" : m, "data": curArrData};
+    var mainParam = {"start": pathObject.start, "finish": finish, "path": pathObject.path, "map": map};
+
+    $.ajax({
+        type: 'POST',
+        url: '/srvc/path/cost_map',
+        dataType: 'json',
+        data: JSON.stringify(mainParam), 
+        contentType: "application/json; charset=utf-8",
+        success: function(data)
+        {
+            pathCostField = document.getElementById("path_cost");
+            pathCostField.value = JSON.stringify(data); 
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert(' Error in processing!\nError txt: ' + jqXHR.responseText);
+        }  
+    });
+  });
+});
+</script>
+</html>
