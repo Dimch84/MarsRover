@@ -237,5 +237,30 @@ router.get("/path/cost_map", jsonParser, function (req, res) {
     }
 });
 
+router.post("/path/cost_map", jsonParser, function (req, res) {
+    if (!req.body) {
+        res.status(404).send();
+    }
+    try {
+        let start = {x: parseInt(req.body.start.x), y: parseInt(req.body.start.y)};
+        let finish = {x: parseInt(req.body.finish.x), y: parseInt(req.body.finish.y)};
+        let pth = req.body.path;
+        let map = req.body.map; // map is already JSON object here
+        try {
+            let path = getPathCost(buildMapFromJSON(map), pth, start, finish);
+            res.send(path);
+        } catch (err) {
+            res.status(400).send(err);
+        }
+
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            res.status(404).send();
+        } else {
+            res.status(404).send(err);
+        }
+    }
+});
+
 ////////////////////////
 module.exports = router;

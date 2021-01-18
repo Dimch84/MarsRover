@@ -4,7 +4,9 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
     <meta charset="UTF-8">
     <title>Mars</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 </head>
+
 <body onload="initView()">
 <table>
 <tr>
@@ -20,7 +22,7 @@
     <div id="data_reader" style="float: left;" align="left">
         <label id="map_reader" class="saving_field">
             <div>Карта</div>
-            <textarea id="map_area" style='min-width:500px;min-height:200px'>[[1,2,3,4],[1,2,3,4]]</textarea>
+            <textarea id="map_area" style='min-width:500px;min-height:200px'>[[3,4,5,6,1,2],[3,4,5,6,2,1]]</textarea>
             <button onclick="saveMap()"> Draw </button>
         </label>
         <label id="way_reader" class="saving_field">
@@ -35,8 +37,19 @@
     </div>
 </td>
 </tr>
+<tr>
+<td>
+        <label>
+            <div>Стоимость пути</div>
+            <textarea id="path_cost" style='min-width:500px;min-height:20px'>
+	    </textarea>
+            <button id="run_cost_btn" disabled> Get Path Cost </button>
+        </label>
+</td>
+</tr>
 </table>
 </body>
+
 <script>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -82,9 +95,16 @@ var ctx;
 var canvasWidth;
 var canvasHeight;
 var curArrData;
+
+var n;
+var m;
+var xPosDelta=0;
+var yPosDelta=0;
+var pathObject;
+
 function saveMap() {
     return __awaiter(this, void 0, void 0, function () {
-        var field, arrData, _i, arrData_1, line;
+        var field, _i, arrData, arrData_1, line;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -92,6 +112,7 @@ function saveMap() {
                     return [4 /*yield*/, JSON.parse(field.value)];
                 case 1:
                     arrData = _a.sent();
+                    var line;
                     for (_i = 0, arrData_1 = arrData; _i < arrData_1.length; _i++) {
                         line = arrData_1[_i];
                         console.log(line);
@@ -100,6 +121,9 @@ function saveMap() {
                             return [2 /*return*/];
                         }
                     }
+		    n = arrData_1.length; 
+                    m = line.length;	
+
                     applyDataToMap(arrData);
                     return [2 /*return*/];
             }
@@ -130,7 +154,7 @@ function refreshCanvas() {
     ctx.font = Math.max(30, squareSize / 100) + "px Arial";
     for (var i = 0; i < dataHeight; i++) {
         for (var j = 0; j < dataWidth; j++) {
-            ctx.fillText(curArrData[i][j], (j + 0.5) * squareSize, (i + 0.5) * squareSize, squareSize);
+            //ctx.fillText(curArrData[i][j], (j + 0.5) * squareSize, (i + 0.5) * squareSize, squareSize);
             ctx.drawImage(patterns[curArrData[i][j]-1], j * squareSize, i * squareSize, squareSize, squareSize);
         }
     }
@@ -142,7 +166,7 @@ function initCanvas() {
 }
 function runWay() {
     return __awaiter(this, void 0, void 0, function () {
-        var pathField, pathObject, data, ctx, curX, curY, deltaX, deltaY, _i, data_1, c, savedWidth;
+        var pathField, data, ctx, curX, curY, deltaX, deltaY, _i, data_1, c, savedWidth;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -172,8 +196,14 @@ function runWay() {
                         'RIGHT': 0,
                         'LEFT': 0
                     };
+
+                    xPosDelta = 0;
+                    yPosDelta = 0;
                     for (_i = 0, data_1 = data; _i < data_1.length; _i++) {
                         c = data_1[_i];
+                        xPosDelta += deltaX[c];
+                        yPosDelta += deltaY[c];
+
                         curX += deltaX[c] * squareSize;
                         curY += deltaY[c] * squareSize;
                         ctx.lineTo(curX, curY);
@@ -192,6 +222,8 @@ function runWay() {
                     ctx.fill();
                     ctx.lineWidth = savedWidth;
                     ctx.stroke();
+
+		    document.getElementById("run_cost_btn").disabled = false;
                     return [2 /*return*/];
             }
         });
@@ -207,6 +239,39 @@ function initView() {
     initCanvas();
     loadPictures();
 }
+
+function getMapData()
+{
+       var finish = {"x": pathObject.start.x + xPosDelta, "y": pathObject.start.y + yPosDelta}
+       var map = {"n": n, "m" : m, "data": curArrData};
+       var mainParam = {"start": pathObject.start, "finish": finish, "path": pathObject.path, "map": map};
+       return mainParam;	
+}
+
+
+$(document).ready(function(){
+ $("#run_cost_btn").click(function (event) {
+       var finish = {"x": pathObject.start.y + yPosDelta, "y": pathObject.start.x + xPosDelta} // service takes X axis as vertical, Y - horizon 
+       var map = {"n": n, "m" : m, "data": curArrData};
+       var mainParam = {"start": pathObject.start, "finish": finish, "path": pathObject.path, "map": map};
+
+  $.ajax({
+    type: 'POST',
+    url: '/srvc/path/cost_map',
+    dataType: 'json',
+    data: JSON.stringify(mainParam), 
+    contentType: "application/json; charset=utf-8",
+    success: function(data)
+    {
+       pathCostField = document.getElementById("path_cost");
+       pathCostField.value = JSON.stringify(data); 
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+       alert(' Error in processing!\nError txt: ' + jqXHR.responseText);
+    }  
+  });
+ });
+});
 
 </script>
 </html>
