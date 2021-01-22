@@ -8,14 +8,14 @@ namespace MarsroverWpf.Model
 {
     public class PathRequest
     {
-        public int id;
         public Position start;
         public Position finish;
+        public FieldToSave map;
 
         PathRequest() { }
-        public PathRequest(int id, int startX, int startY, int finishX, int finishY) 
+        public PathRequest(FieldToSave map, int startX, int startY, int finishX, int finishY) 
         {
-            this.id = id;
+            this.map = map;
             start = new Position(startX, startY);
             finish = new Position(finishX, finishY);
         }

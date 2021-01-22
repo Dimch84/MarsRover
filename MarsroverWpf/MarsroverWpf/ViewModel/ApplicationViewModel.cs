@@ -20,7 +20,7 @@ namespace MarsroverWpf.ViewModel
 {
     public class ApplicationViewModel
     {
-        private Field field = new Field(5, 5);
+        private Field field = new Field(8, 6);
         private string serviceUrl;
         private int mapId = 0;
         private int startX = 0;
@@ -28,6 +28,9 @@ namespace MarsroverWpf.ViewModel
         private int finishX = 0;
         private int finishY = 0;
         private string pathString = "path";
+        private string mapString = "";
+        private int cost = 0;
+        private int energy = 0;
 
         public string ServiceUrl
         {
@@ -104,6 +107,35 @@ namespace MarsroverWpf.ViewModel
             }
         }
 
+        public string MapString
+        {
+            get => mapString;
+            set
+            {
+                mapString = value;
+                OnPropertyChanged("MapString");
+            }
+        }
+
+        public int Cost
+        {
+            get => cost;
+            set
+            {
+                cost = value;
+                OnPropertyChanged("Cost");
+            }
+        }
+        public int Energy
+        {
+            get => energy;
+            set
+            {
+                energy = value;
+                OnPropertyChanged("Energy");
+            }
+        }
+
         #region Commands
 
         private RelayCommand loadMapCommand;
@@ -149,7 +181,7 @@ namespace MarsroverWpf.ViewModel
                 return findPathCommand ??
                        (findPathCommand = new RelayCommand(obj =>
                        {
-                           var request = WebRequest.Create(serviceUrl + "/path");
+                           var request = WebRequest.Create(serviceUrl + "/path/map");
 
                            request.ContentType = "application/json";
                            request.Method = "GET";
@@ -160,11 +192,12 @@ namespace MarsroverWpf.ViewModel
                            var methodType = currentMethod.GetType();
                            methodType.GetField("ContentBodyNotAllowed", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(currentMethod, false);
 
-                           PathRequest pathRequest = new PathRequest(mapId, startX, startY, finishX, finishY);
+                           PathRequest pathRequest = new PathRequest(field.GetRequestField(), startX, startY, finishX, finishY);
 
                            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
                            {
                                streamWriter.Write(JsonConvert.SerializeObject(pathRequest));
+                               Console.WriteLine(JsonConvert.SerializeObject(pathRequest));
                            }
                            HttpWebResponse response = null;
                            try
@@ -184,6 +217,26 @@ namespace MarsroverWpf.ViewModel
                            }
                            field.ApplyPath(responseText, startX, startY);
 
+                       }));
+            }
+        }
+
+        private RelayCommand setMapCommand;
+        public RelayCommand SetMapCommand
+        {
+            get
+            {
+                return setMapCommand ??
+                       (setMapCommand = new RelayCommand(obj =>
+                       {
+                           try
+                           {
+                               field.LoadFromString(mapString);
+                           }
+                           catch (Exception e)
+                           {
+                               MessageBox.Show("Error!");
+                           }
                        }));
             }
         }

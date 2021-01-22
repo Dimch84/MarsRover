@@ -38,8 +38,8 @@ namespace MarsroverWpf.Model
 
 		public Field(int m, int n)
 		{
-			this.n = n;
-			this.m = m;
+			N = n;
+			M = m;
 			for (int i = 0; i < n * m; i++)
 			{
 				Tiles.Add(new Tile { Id = 1 });
@@ -76,9 +76,17 @@ namespace MarsroverWpf.Model
 			}
 		}
 
+		public FieldToSave GetRequestField()
+        {
+			return new FieldToSave(n, m, Tiles);
+			
+		}
+
 		public void LoadFromString(string s)
 		{
 			FieldToSave loadedField = JsonConvert.DeserializeObject<FieldToSave>(s);
+			if (loadedField == null)
+				return;
 			N = loadedField.n;
 			M = loadedField.m;
 			Tiles.Clear();
@@ -101,40 +109,40 @@ namespace MarsroverWpf.Model
                 switch (cmd)
                 {
                     case "RIGHT":
-                        Tiles[startY * N + startX].Id += multipliers[lastCmd + "RIGHT"] * 6;
+                        Tiles[startX * M + startY].Id += multipliers[lastCmd + "RIGHT"] * 6;
 						lastCmd = "RIGHT";
-                        startX += 1;
+                        startY += 1;
                         break;
                     case "LEFT":
-                        Tiles[startY * N + startX].Id += multipliers[lastCmd + "LEFT"] * 6;
+                        Tiles[startX * M + startY].Id += multipliers[lastCmd + "LEFT"] * 6;
 						lastCmd = "LEFT";
-						startX -= 1;
-                        break;
-                    case "UP":
-                        Tiles[startY * N + startX].Id += multipliers[lastCmd + "UP"] * 6;
-						lastCmd = "UP";
 						startY -= 1;
                         break;
+                    case "UP":
+                        Tiles[startX * M + startY].Id += multipliers[lastCmd + "UP"] * 6;
+						lastCmd = "UP";
+						startX -= 1;
+                        break;
                     case "DOWN":
-                        Tiles[startY * N + startX].Id += multipliers[lastCmd + "DOWN"] * 6;
+                        Tiles[startX * M + startY].Id += multipliers[lastCmd + "DOWN"] * 6;
 						lastCmd = "DOWN";
-						startY += 1;
+						startX += 1;
                         break;
                 }
             }
 			switch (lastCmd)
 			{
 				case "RIGHT":
-					Tiles[startY * N + startX].Id += multipliers["LEFT"] * 6;
+					Tiles[startX * M + startY].Id += multipliers["LEFT"] * 6;
 					break;
 				case "LEFT":
-					Tiles[startY * N + startX].Id += multipliers["RIGHT"] * 6;
+					Tiles[startX * M + startY].Id += multipliers["RIGHT"] * 6;
 					break;
 				case "UP":
-					Tiles[startY * N + startX].Id += multipliers["DOWN"] * 6;
+					Tiles[startX * M + startY].Id += multipliers["DOWN"] * 6;
 					break;
 				case "DOWN":
-					Tiles[startY * N + startX].Id += multipliers["UP"] * 6;
+					Tiles[startX * M + startY].Id += multipliers["UP"] * 6;
 					break;
 			}
 		}
